@@ -1,3 +1,8 @@
 baseURL = "https://philsimon.github.io/my-experiment/"
 title = "My Experiment"
-theme = "ananke"
+theme = "hugo-book"
+
+[params]
+  # Render all content sections into the book menu (not just a "docs" section)
+  BookSection = "*"
+  BookComments = false

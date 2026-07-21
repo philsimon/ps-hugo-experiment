@@ -1,0 +1,15 @@
+{
+  "name": "My Experiment",
+  "short_name": "My Experiment",
+  "start_url": "/my-experiment/",
+  "scope": "/my-experiment/",
+  "display": "standalone",
+  "background_color": "#000000",
+  "theme_color": "#000000",
+  "icons": [
+    {
+      "src": "/my-experiment/favicon.svg",
+      "sizes": "512x512"
+    }
+  ]
+}
