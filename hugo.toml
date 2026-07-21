@@ -1,0 +1,3 @@
+baseURL = "https://your-username.github.io/my-experiment/"
+title = "My Experiment"
+theme = "ananke"
