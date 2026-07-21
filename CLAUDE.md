@@ -14,22 +14,24 @@ git clone --recurse-submodules <repo>
 # or, if already cloned:
 git submodule update --init --recursive
 
-# Local preview with live reload (writes dev output to public/ by default)
+# Local preview with live reload (writes dev output to public/, gitignored)
 hugo server
 
-# Production build — GitHub Pages serves from docs/, NOT the Hugo default public/
-hugo --minify --destination docs --cleanDestinationDir
-
-# New post
-hugo new content posts/my-post.md
+# Local production-equivalent build, for checking output before pushing
+hugo --minify
 ```
+
+## Deployment
+
+**Deploys are fully automated via `.github/workflows/hugo.yml` — push to `main` and it's live in about a minute.** GitHub Pages is configured with `build_type: workflow` (via `gh api repos/philsimon/my-experiment/pages`), meaning Pages serves whatever the Actions workflow uploads as an artifact, not any committed folder or branch.
+
+- **`docs/` and `public/` are both gitignored and untracked.** They used to be committed build output — first `docs/`, then briefly both — which caused the site to go stale repeatedly whenever content changed but nobody remembered to rebuild and commit the HTML (this happened at least three times before the workflow was fixed). Do not re-add either directory to git; if you see them tracked again, something has regressed.
+- **Never edit content directly on GitHub's web UI without also being aware CI will now handle the rebuild.** Before the Actions workflow existed, direct edits to `content/*.md` via the GitHub UI silently didn't update the live site, because nothing rebuilt the committed `docs/` folder. That failure mode is now gone — any push to `main`, from anywhere, triggers a full rebuild and deploy.
+- If the workflow needs to be re-run without a new commit, use `workflow_dispatch` (it's enabled) via `gh workflow run hugo.yml`.
 
 ## Architecture
 
-- **Publish target is `docs/`, not `public/`.** GitHub Pages for this repo is configured (via repo Settings → Pages) to serve from the `main` branch, `/docs` folder — confirmed via `gh api repos/philsimon/my-experiment/pages`. Hugo's default output directory is `public/`, so every production build must pass `--destination docs`. Do not assume a plain `hugo` or `hugo --minify` call updates the live site.
-- **`public/` is a leftover, not the deploy target.** It's tracked in git but not what Pages serves. Historically it has also picked up dev-server artifacts (see below), so treat modifications to it with suspicion — check whether they're a real content change or server noise before committing.
-- **No CI currently builds or deploys this site.** A GitHub Actions workflow (`.github/workflows/hugo.yml`) was added in one commit and accidentally deleted two commits later in a commit titled "Build site" (likely an unintentional `git add -A` after a working-directory cleanup). Deploys are currently manual: run the production build command above, commit `docs/`, and push. If re-adding CI, don't reintroduce the same collision — a workflow should `git rm -r public` or gitignore it if it isn't the actual deploy source.
 - **Themes are git submodules**, declared in `.gitmodules`. `themes/ananke` (the original theme) is still present but unused since the switch to `hugo-book`; it can be removed if it won't be revisited.
 - **`hugo-book` is a documentation theme, not a blog theme.** Its default `BookSection` param only renders content under a `docs/` content section into the sidebar menu. This site sets `BookSection = "*"` in `hugo.toml` to render all content sections (i.e. `content/posts/`) into the menu without restructuring existing content. Keep this in mind if adding new content sections — they'll appear in the menu automatically under `*`.
-- **`baseURL` in `hugo.toml` must match the real Pages URL** (`https://philsimon.github.io/my-experiment/`). It previously shipped with Hugo's placeholder `your-username.github.io` value, which got baked into every generated page (canonical links, OG tags, footer links) until corrected — a reminder that `baseURL` errors don't show up as build failures, only as bad links in the output.
-- A `hugo server` process left running in the background will keep rewriting `public/` with dev-mode markup (injected livereload script, `noindex, nofollow` robots meta, unminified CSS refs) any time a watched file changes. If `git status` shows unexpected `public/` diffs, check for a stray `hugo server` process before assuming it's a real content change.
+- **`baseURL` in `hugo.toml` is a local-dev fallback only** — the production workflow overrides it at build time with `--baseURL` set from `actions/configure-pages`, so it always matches whatever URL Pages actually assigns. Still keep the committed value pointed at `https://philsimon.github.io/my-experiment/` for local builds and previews.
+- A `hugo server` process left running in the background will keep rewriting `public/` with dev-mode markup (injected livereload script, `noindex, nofollow` robots meta, unminified CSS refs). This no longer matters for deploys since `public/` isn't committed or published, but it can be confusing if you're inspecting `public/` output directly.
