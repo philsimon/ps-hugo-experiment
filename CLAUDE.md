@@ -4,7 +4,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## What This Is
 
-A Hugo static site (`my-experiment`), deployed to GitHub Pages at https://philsimon.github.io/my-experiment/. Content lives in `content/posts/`; the active theme is `hugo-book` (`themes/hugo-book`), added as a git submodule.
+A Hugo static site (`my-experiment`), deployed to GitHub Pages at https://philsimon.github.io/my-experiment/. Content lives in `content/posts/`; the active theme is `beautifulhugo` (`themes/beautifulhugo`), added as a git submodule.
 
 ## Commands
 
@@ -31,7 +31,8 @@ hugo --minify
 
 ## Architecture
 
-- **Themes are git submodules**, declared in `.gitmodules`. `themes/ananke` (the original theme) is still present but unused since the switch to `hugo-book`; it can be removed if it won't be revisited.
-- **`hugo-book` is a documentation theme, not a blog theme.** Its default `BookSection` param only renders content under a `docs/` content section into the sidebar menu. This site sets `BookSection = "*"` in `hugo.toml` to render all content sections (i.e. `content/posts/`) into the menu without restructuring existing content. Keep this in mind if adding new content sections — they'll appear in the menu automatically under `*`.
+- **Themes are git submodules**, declared in `.gitmodules`. `themes/ananke` and `themes/hugo-book` (earlier themes tried this session) are still present but unused since the switch to `beautifulhugo`; either can be removed if they won't be revisited.
+- **`beautifulhugo` expects `Params.mainSections` to match the actual content section name.** The theme's own example config sets `mainSections = ["post", "recipe"]`, but this site's content lives under `content/posts/` (plural), so `hugo.toml` sets `mainSections = ["posts"]`. Get this wrong and the homepage/RSS feed silently omit all posts — it's not a build error, just empty output.
+- Some theme configs (e.g. Blowfish, tried and reverted) expect a `config/_default/*.toml` directory structure instead of a single `hugo.toml`. `beautifulhugo` uses the single-file style like the themes before it — don't mix the two approaches in the same build.
 - **`baseURL` in `hugo.toml` is a local-dev fallback only** — the production workflow overrides it at build time with `--baseURL` set from `actions/configure-pages`, so it always matches whatever URL Pages actually assigns. Still keep the committed value pointed at `https://philsimon.github.io/my-experiment/` for local builds and previews.
 - A `hugo server` process left running in the background will keep rewriting `public/` with dev-mode markup (injected livereload script, `noindex, nofollow` robots meta, unminified CSS refs). This no longer matters for deploys since `public/` isn't committed or published, but it can be confusing if you're inspecting `public/` output directly.

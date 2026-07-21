@@ -1,8 +1,27 @@
 baseURL = "https://philsimon.github.io/my-experiment/"
 title = "My Experiment"
-theme = "hugo-book"
+theme = "beautifulhugo"
+DefaultContentLanguage = "en"
 
-[params]
-  # Render all content sections into the book menu (not just a "docs" section)
-  BookSection = "*"
-  BookComments = false
+[pagination]
+  pagerSize = 5
+
+[taxonomies]
+  category = "categories"
+  tag = "tags"
+
+[Params]
+  subtitle = "A Hugo experiment"
+  mainSections = ["posts"]
+  dateFormat = ":date_long"
+  rss = true
+  readingTime = true
+  colorScheme = "auto"
+
+[markup.goldmark.renderer]
+  unsafe = true
+
+[outputs]
+  home = ["HTML", "RSS"]
+  section = ["HTML", "RSS"]
+  page = ["HTML"]
