@@ -1,5 +1,5 @@
-baseURL = "https://philsimon.github.io/my-experiment/"
-title = "My Experiment"
+baseURL = "https://philsimon.github.io/ps-hugo-experiment/"
+title = "PS Hugo Experiment"
 theme = "beautifulhugo"
 DefaultContentLanguage = "en"
 
